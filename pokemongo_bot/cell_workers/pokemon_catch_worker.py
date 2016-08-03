@@ -4,6 +4,10 @@ import time
 from pokemongo_bot import logger
 from pokemongo_bot.human_behaviour import (normalized_reticle_size, sleep,
                                            spin_modifier)
+from subprocess import call
+
+def show_pokemon_image(pokemon_id):
+    call('curl -s https://raw.githubusercontent.com/billyvg/pokemon-journal/master/app/images/{}.png | imgcat'.format(str(pokemon_id).zfill(3)), shell=True)
 
 class PokemonCatchWorker(object):
     BAG_FULL = 'bag_full'
@@ -59,7 +63,7 @@ class PokemonCatchWorker(object):
 
                                 pokemon_potential = self.pokemon_potential(pokemon_data)
                                 pokemon_num = int(pokemon_data['pokemon_id']) - 1
-                                pokemon_name = self.pokemon_list[int(pokemon_num)]['Name']
+                                pokemon_name = self.pokemon_list[pokemon_num]['Name']
                                 logger.log('A Wild {} appeared! [CP {}] [Potential {}]'.format(
                                     pokemon_name, cp, pokemon_potential), 'yellow')
 
@@ -251,6 +255,7 @@ class PokemonCatchWorker(object):
                                         iv_display,
                                         sum(response_dict['responses']['CATCH_POKEMON']['capture_award']['xp'])
                                     ), 'blue')
+                                    show_pokemon_image(pokemon_data['pokemon_id'])
                                     self.bot.softban = False
 
                                     if (self.config.evolve_captured
@@ -419,4 +424,3 @@ class PokemonCatchWorker(object):
             'and': lambda x, y: x and y
         }
         return logic_to_function[cp_iv_logic](*catch_results.values())
-
